@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model TitleConfiguration {
+  title     String   @id
+  locked    Boolean
+  ttl       Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("title_configurations")
+}
+
+model TitleRequest {
+  id            Int      @id @default(autoincrement())
+  discordUserId BigInt   @map("discord_user_id")
+  kingdom       String   @map("kingdom_id")
+  x             Int
+  y             Int
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("title_requests")
+}

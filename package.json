@@ -1,0 +1,62 @@
+{
+  "name": "rok-title-keeper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rise of Kingdoms bot to manage titles through Discord.",
+  "keywords": [
+    "automation",
+    "adb",
+    "discord-bot",
+    "rise-of-kingdoms"
+  ],
+  "homepage": "https://github.com/daniellwdb/rok-title-keeper#readme",
+  "bugs": {
+    "url": "https://github.com/daniellwdb/rok-title-keeper/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daniellwdb/rok-title-keeper.git"
+  },
+  "license": "MIT",
+  "author": "Daniell Wijdenbosch <d.wijdenbosch@icloud.com>",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "prepare": "husky install",
+    "start": "tsx watch -r dotenv/config ./src/index.ts | pino-pretty -t \"SYS:yyyy-dd-mm HH:MM:ss\" -i pid"
+  },
+  "lint-staged": {
+    "*.ts": "eslint --cache --fix",
+    "*": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.16.1",
+    "adb-ts": "^4.0.4",
+    "convict": "^6.2.4",
+    "discord.js": "^14.11.0",
+    "pino": "^8.14.1",
+    "rxjs": "^7.8.1",
+    "sharp": "^0.32.1",
+    "tesseract.js": "^4.1.1",
+    "ts-lib": "^0.0.5"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.6.6",
+    "@commitlint/config-conventional": "^17.6.6",
+    "@types/convict": "^6.1.2",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.43.0",
+    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.2.2",
+    "pino-pretty": "^10.0.0",
+    "prettier": "^2.8.8",
+    "prisma": "^4.16.1",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.3"
+  }
+}
