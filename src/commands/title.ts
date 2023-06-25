@@ -6,6 +6,8 @@ import {
   ButtonBuilder,
   ButtonStyle,
   Colors,
+  DiscordjsError,
+  DiscordjsErrorCodes,
   EmbedBuilder,
   SlashCommandBuilder,
 } from "discord.js";
@@ -220,6 +222,15 @@ export const titleCommand = {
       });
 
       cancel$.next({ discordUserId: interaction.user.id });
+    } catch (error) {
+      if (
+        error instanceof DiscordjsError &&
+        error.code === DiscordjsErrorCodes.InteractionCollectorError
+      ) {
+        return;
+      }
+
+      throw error;
     } finally {
       await successMessage.edit({
         components: [
