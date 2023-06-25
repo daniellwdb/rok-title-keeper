@@ -128,18 +128,17 @@ export const titleCommand = {
         )
       : titleRequests.at(-1);
 
-    if (!latestTitleRequest) {
-      throw new Error("Could not find latest title request.");
-    }
-
-    const kingdomForTitleRequest = kingdom ?? latestTitleRequest.kingdom;
+    const kingdomForTitleRequest = kingdom ?? latestTitleRequest?.kingdom;
 
     const lastInsertedTitleRequest = await prisma.titleRequest.create({
       data: {
         discordUserId: BigInt(interaction.user.id),
-        kingdom: kingdomForTitleRequest,
-        x: x ?? latestTitleRequest.x,
-        y: y ?? latestTitleRequest.y,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        kingdom: kingdomForTitleRequest!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        x: x ?? latestTitleRequest!.x,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        y: y ?? latestTitleRequest!.y,
       },
       select: {
         kingdom: true,
