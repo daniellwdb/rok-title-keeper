@@ -83,12 +83,6 @@ export const titleCommand = {
       return interaction.followUp("You can only request 1 title at a time.");
     }
 
-    await interaction.followUp(
-      `You requested the ${title} title. Your position in the queue is: ${
-        titleQueueCounts$.value[title].length + 1
-      }`
-    );
-
     // TODO: refactor title request history
     const titleRequests = await prisma.titleRequest.findMany({
       where: {
@@ -146,6 +140,12 @@ export const titleCommand = {
         y: true,
       },
     });
+
+    await interaction.followUp(
+      `You requested the ${title} title. Your position in the queue is: ${
+        titleQueueCounts$.value[title].length + 1
+      }`
+    );
 
     const titleTtl = titleConfiguration?.ttl ?? 60;
 
