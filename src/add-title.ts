@@ -27,7 +27,7 @@ const ELEMENT_POSITIONS = {
   X_COORDINATE_INPUT: "798.5 179",
   Y_COORDINATE_INPUT: "991.5 179",
   COORDINATES_OVERLAY_SEARCH_BUTTON: "1102 179",
-  SCREEN_CENTER: "800 450",
+  CITY_LOCATION: "800 449",
   JUSTICE_TITLE_CHECKBOX: "367 493",
   DUKE_TITLE_CHECKBOX: "643 493",
   ARCHITECT_TITLE_CHECKBOX: "938 493",
@@ -116,7 +116,7 @@ export const addTitle = async ({
   setLastVisitedKingdom(kingdom);
 
   // Tap city
-  await device.shell(`input tap ${ELEMENT_POSITIONS.SCREEN_CENTER}`);
+  await device.shell(`input tap ${ELEMENT_POSITIONS.CITY_LOCATION}`);
 
   await setTimeout(UI_ELEMENT_ANIMATION_DURATION);
 
