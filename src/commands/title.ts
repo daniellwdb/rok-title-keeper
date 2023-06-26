@@ -180,7 +180,9 @@ export const titleCommand = {
       .setColor(Colors.DarkGold)
       .setTitle(`${title} title requested by ${interaction.member.displayName}`)
       .setImage("attachment://screenshot.jpg")
-      .setFooter({ text: `📍 ${kingdom} kingdom @${x}, ${y}` });
+      .setFooter({
+        text: `📍 ${lastInsertedTitleRequest.kingdom} kingdom @${lastInsertedTitleRequest.x}, ${lastInsertedTitleRequest.y}`,
+      });
 
     if (!titleRequestResult.success) {
       return interaction.channel.send({
