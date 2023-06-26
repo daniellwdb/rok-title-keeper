@@ -150,7 +150,6 @@ export const addTitle = async ({
     .then((meta) =>
       cityPreviewImage
         .threshold(185)
-        .sharpen()
         .extract({
           top: BORDER_SIZE,
           left: BORDER_SIZE,
