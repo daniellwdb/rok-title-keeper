@@ -35,7 +35,7 @@ const ELEMENT_POSITIONS = {
   SCIENTIST_TITLE_CHECKBOX: "1226 493",
   CONFIRM_BUTTON: "801.5 800",
   TITLE_OVERLAY_CLOSE_BUTTON: "1395 56",
-  ONLINE_STATUS_INDICATOR: "97 12.5",
+  ONLINE_STATUS_INDICATOR: "95 9",
 } as const;
 
 const QUICK_TRAVEL_TIMEOUT = 4_000;
@@ -60,7 +60,7 @@ export const addTitle = async ({
     ])
   );
 
-  const ONLINE_STATUS_INDICATOR_HEX = "#cdd8ad";
+  const ONLINE_STATUS_INDICATOR_HEX = "#e30000";
 
   if (onlineStatusIndicatorHexColour !== ONLINE_STATUS_INDICATOR_HEX) {
     await rebootRoK(device);
@@ -149,7 +149,7 @@ export const addTitle = async ({
     .metadata()
     .then((meta) =>
       cityPreviewImage
-        .threshold(215)
+        .threshold(185)
         .sharpen()
         .extract({
           top: BORDER_SIZE,
