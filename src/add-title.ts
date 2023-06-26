@@ -149,7 +149,8 @@ export const addTitle = async ({
     .metadata()
     .then((meta) =>
       cityPreviewImage
-        .threshold(185)
+        .threshold(200)
+        .blur(0.75)
         .extract({
           top: BORDER_SIZE,
           left: BORDER_SIZE,
@@ -166,6 +167,8 @@ export const addTitle = async ({
         .png()
         .toBuffer()
     );
+
+  await sharp(cityPreviewImageBuffer).toFile("out.png");
 
   const { data } = await worker.recognize(cityPreviewImageBuffer);
 
