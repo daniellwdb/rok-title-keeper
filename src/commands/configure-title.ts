@@ -34,7 +34,7 @@ export const configureTitleCommand = {
     await interaction.deferReply();
 
     const title = interaction.options.getString("title", true) as Title;
-    const ttl = interaction.options.getInteger("duration", true);
+    const ttl = interaction.options.getInteger("ttl", true);
     const locked = interaction.options.getBoolean("locked", true);
 
     await prisma.titleConfiguration.upsert({
