@@ -8,6 +8,7 @@ import { Kingdom, type Title } from "./types.js";
 import {
   getLastVisitedKingdom,
   getPixelHexColour,
+  rebootRoK,
   setLastVisitedKingdom,
 } from "./util/util.module.js";
 
@@ -34,6 +35,7 @@ const ELEMENT_POSITIONS = {
   SCIENTIST_TITLE_CHECKBOX: "1226 493",
   CONFIRM_BUTTON: "801.5 800",
   TITLE_OVERLAY_CLOSE_BUTTON: "1395 56",
+  ONLINE_STATUS_INDICATOR: "97 12.5",
 } as const;
 
 const QUICK_TRAVEL_TIMEOUT = 4_000;
@@ -50,6 +52,24 @@ export const addTitle = async ({
   x,
   y,
 }: AddTitleOptions) => {
+  const onlineStatusIndicatorHexColour = await getPixelHexColour(
+    await device.screenshot(),
+    ...(ELEMENT_POSITIONS.ONLINE_STATUS_INDICATOR.split(" ").map(Number) as [
+      number,
+      number
+    ])
+  );
+
+  const ONLINE_STATUS_INDICATOR_HEX = "#cdd8ad";
+
+  if (onlineStatusIndicatorHexColour !== ONLINE_STATUS_INDICATOR_HEX) {
+    await rebootRoK(device);
+
+    throw new Error(
+      "Rise of Kingdoms was closed and restarted. Please request your title again."
+    );
+  }
+
   const worker = await createWorker();
 
   await worker.loadLanguage("eng");
