@@ -168,8 +168,6 @@ export const addTitle = async ({
         .toBuffer()
     );
 
-  await sharp(cityPreviewImageBuffer).toFile("out.png");
-
   const { data } = await worker.recognize(cityPreviewImageBuffer);
 
   const blocks = data.blocks?.find(({ text }) =>
