@@ -5,8 +5,10 @@
   "description": "Rise of Kingdoms bot to manage titles through Discord.",
   "keywords": [
     "automation",
+    "ocr",
     "adb",
     "discord-bot",
+    "preprocessing",
     "rise-of-kingdoms"
   ],
   "homepage": "https://github.com/daniellwdb/rok-title-keeper#readme",
