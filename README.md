@@ -3,7 +3,7 @@
   <h4>
     Rise of Kingdoms bot to manage titles through Discord.
   </h4>
-  <img src="./docs/images/preview.webp" height="500" alt="Rise of Kingdoms screenshot" />
+  <img src="./docs/images/demo.gif" alt="Rise of Kingdoms screenshot" />
 </div>
 
 <div align="center">
