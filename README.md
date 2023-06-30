@@ -28,11 +28,14 @@
 
 Rise of Kingdoms bot to manage titles through Discord.
 
-**Disclaimer:** This bot is an independent project and is not affiliated, endorsed, or associated with Rise of Kingdoms, its developers, or any official entities related to the game.
+**Disclaimer:** This bot is an independent project and is not affiliated, endorsed, or associated with Rise of Kingdoms, its developers, or any official entities related to the game. By using this bot, you acknowledge and agree that you do so at your own risk. The developer of this bot assumes no responsibility or liability for any consequences, penalties, or actions that may result from its usage.
 
 ## 🔑 Key Features
 
-WIP
+- Queue system to ensure fair title handout.
+- Ability to lock titles and set their hold time.
+- Automatic reboot when necessary.
+- OCR to detect where to click for title handouts.
 
 ## 💻 Setup
 
