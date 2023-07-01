@@ -45,6 +45,9 @@ Rise of Kingdoms bot to manage titles through Discord.
 - [Android SDK Platform-Tools](https://dl.google.com/android/repository/platform-tools_r31.0.3-windows.zip).
 - [Node.js](https://nodejs.org/en).
 - [Discord bot + token](https://discordjs.guide/preparations/setting-up-a-bot-application.html#setting-up-a-bot-application).
+- [OpenCV](https://sourceforge.net/projects/opencvlibrary/).
+- [Python 3](https://apps.microsoft.com/store/detail/python-311/9NRWMJP3717K).
+- [Visual Studio Build Tools (Select "Desktop Development with C++")](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools).
 
 ### Getting started
 
@@ -61,15 +64,17 @@ cd rok-title-keeper
 npm install
 ```
 
+> Extract the platform-tools zip downloaded earlier so that you end up with a `platform-tools` folder in the root of this project (`rok-title-keeper/platform-tools`).
+
+> Set the `OPENCV4NODEJS_DISABLE_AUTOBUILD=1` environment variable and run `npx build-opencv --version 4.6.0 rebuild`.
+
 3. Configure environment variables in `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-4. Extract the platform-tools zip so that you end up with a `platform-tools` folder in the root of this project.
-
-5. In BlueStacks, set the following settings:
+4. In BlueStacks, set the following settings:
 
 **Performance**
 
@@ -87,7 +92,7 @@ _Pixel density_ -> Custom (450 DPI)
 
 _Android debug bridge_ -> ON
 
-6. Open Rise of Kingdoms and **make sure your character is not in the "Your City" view so it can enter coordinates**.
+5. Open Rise of Kingdoms and **make sure your character is not in the "Your City" view so it can enter coordinates**.
 
 ### Scripts
 
