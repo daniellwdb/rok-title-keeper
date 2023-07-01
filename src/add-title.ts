@@ -1,10 +1,12 @@
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { setTimeout } from "node:timers/promises";
 import type { Device } from "adb-ts";
 import { type Logger } from "pino";
-import sharp from "sharp";
 import { OEM, PSM, createWorker } from "tesseract.js";
 import { config } from "./config.js";
 import { Kingdom, type Title } from "./types.js";
+import { findCutoutPosition } from "./util/find-cutout-position.js";
 import {
   getLastVisitedKingdom,
   getPixelHexColour,
@@ -42,12 +44,11 @@ const QUICK_TRAVEL_TIMEOUT = 4_000;
 const SLOW_TRAVEL_TIMEOUT = 17_000;
 const UI_ELEMENT_ANIMATION_DURATION = 750;
 const NEW_CLICK_IDLE_TIMEOUT = 100;
-const TITLE_BUTTON_COORDINATES_OFFSET = 195;
 
 export const addTitle = async ({
   device,
   title,
-  logger,
+  logger: _logger,
   kingdom,
   x,
   y,
@@ -140,57 +141,28 @@ export const addTitle = async ({
 
   await setTimeout(UI_ELEMENT_ANIMATION_DURATION);
 
-  const cityPreviewImage = sharp(await device.screenshot());
+  const SCREENSHOT_PATH = join(process.cwd(), "temp", "screenshot.jpg");
 
-  const BORDER_SIZE = 150;
-  const BORDER_COLOUR = "#000";
-
-  const cityPreviewImageBuffer = await cityPreviewImage
-    .metadata()
-    .then((meta) =>
-      cityPreviewImage
-        .threshold(210)
-        .blur(0.75)
-        .extract({
-          top: BORDER_SIZE,
-          left: BORDER_SIZE,
-          width: (meta.width ?? 0) - 2 * BORDER_SIZE,
-          height: (meta.height ?? 0) - 2 * BORDER_SIZE,
-        })
-        .extend({
-          top: BORDER_SIZE,
-          bottom: BORDER_SIZE,
-          left: BORDER_SIZE,
-          right: BORDER_SIZE,
-          background: BORDER_COLOUR,
-        })
-        .png()
-        .toBuffer()
-    );
-
-  const { data } = await worker.recognize(cityPreviewImageBuffer);
-
-  const blocks = data.blocks?.find(({ text }) =>
-    text.trim().split(" ").join("").includes(`X${x}Y${y}`)
+  const ADD_TITLE_BUTTON_IMAGE_PATH = join(
+    process.cwd(),
+    "resources",
+    "add-title-button.jpg"
   );
 
-  if (!blocks?.bbox.x0 || !blocks.bbox.y0) {
-    logger.warn(
-      `Failed to read coordinates. Requested: ${x}, ${y}. Received: ${JSON.stringify(
-        data.blocks?.map(({ text }) => text.trim().split(" ").join("")),
-        null,
-        2
-      )}`
-    );
+  await writeFile(SCREENSHOT_PATH, await device.screenshot());
 
+  const addTitleButtoncoordinates = await findCutoutPosition(
+    SCREENSHOT_PATH,
+    ADD_TITLE_BUTTON_IMAGE_PATH
+  );
+
+  if (!addTitleButtoncoordinates) {
     throw new Error("You might have entered the wrong coordinates.");
   }
 
   // Tap title icon
   await device.shell(
-    `input tap ${blocks.bbox.x0 - TITLE_BUTTON_COORDINATES_OFFSET} ${
-      blocks.bbox.y0
-    }`
+    `input tap ${addTitleButtoncoordinates.x} ${addTitleButtoncoordinates.y}`
   );
 
   await setTimeout(UI_ELEMENT_ANIMATION_DURATION);
