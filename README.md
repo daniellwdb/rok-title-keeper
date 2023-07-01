@@ -35,7 +35,7 @@ Rise of Kingdoms bot to manage titles through Discord.
 - Queue system to ensure fair title handout.
 - Ability to lock titles and set their hold time.
 - Automatic reboot when necessary.
-- Object to detect where to click for title handouts.
+- Object detection to detect where to click for title handouts.
 
 ## 💻 Setup
 
