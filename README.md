@@ -127,3 +127,8 @@ npx tsx .
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+# TODO:
+
+- Rebrand bot to include info about tracking and managing KvK statistics.
+- Create functionality to lock titles when tracking stats to prevent interference.

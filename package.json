@@ -35,13 +35,15 @@
     "@prisma/client": "^4.16.1",
     "@u4/opencv4nodejs": "^6.5.2",
     "adb-ts": "^4.0.4",
+    "clipboardy": "^3.0.0",
     "convict": "^6.2.4",
     "discord.js": "^14.11.0",
     "pino": "^8.14.1",
     "rxjs": "^7.8.1",
     "sharp": "^0.32.1",
     "tesseract.js": "^4.1.1",
-    "ts-lib": "^0.0.5"
+    "ts-lib": "^0.0.5",
+    "write-excel-file": "^1.4.27"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.6",

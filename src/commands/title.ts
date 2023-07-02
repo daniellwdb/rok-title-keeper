@@ -17,7 +17,7 @@ import {
   requestTitle$,
   titleQueueCounts$,
   titleRequestsQueue$,
-} from "../queue.js";
+} from "../title-queue.js";
 import { Title, type Command, Kingdom } from "../types.js";
 
 export const titleCommand = {
@@ -91,6 +91,12 @@ export const titleCommand = {
         discordUserId: BigInt(interaction.user.id),
       },
     });
+
+    if ((x && !y) || (y && !x)) {
+      return interaction.followUp(
+        "You must provide both coordinates if you provide one."
+      );
+    }
 
     const hasProvidedCoordinates = x && y;
 
@@ -187,7 +193,7 @@ export const titleCommand = {
     if (!titleRequestResult.success) {
       return interaction.channel.send({
         files,
-        content: `${interaction.user}, unable to process your title request.`,
+        content: `${interaction.user}, unable to process your title request. Please try again.`,
         embeds: [
           embedTemplate.setDescription(
             titleRequestResult.error?.message

@@ -1,11 +1,10 @@
 // eslint-disable-next-line import/no-named-as-default
 import cv from "@u4/opencv4nodejs";
 
-const SIMILARITY_THRESHOLD = 0.8;
-
 export const findCutoutPosition = async (
   originalImagePath: string,
-  cutoutImagePath: string
+  cutoutImagePath: string,
+  similarityThreshold = 0.8
 ) => {
   const originalImage = await cv.imreadAsync(originalImagePath);
   const cutoutImage = await cv.imreadAsync(cutoutImagePath);
@@ -19,7 +18,7 @@ export const findCutoutPosition = async (
   );
   const { maxLoc, maxVal } = matched.minMaxLoc();
 
-  if (maxVal >= SIMILARITY_THRESHOLD) {
+  if (maxVal >= similarityThreshold) {
     return {
       x: maxLoc.x,
       y: maxLoc.y,

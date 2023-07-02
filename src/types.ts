@@ -18,6 +18,12 @@ export enum Kingdom {
   LOST = "Lost",
 }
 
+export enum GovernorType {
+  MAIN = "main",
+  ALT = "alt",
+  FARM = "farm",
+}
+
 export interface CommandExecutionContext {
   interaction: ChatInputCommandInteraction<"cached">;
   device: Device;

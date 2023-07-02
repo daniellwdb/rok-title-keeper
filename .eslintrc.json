@@ -26,6 +26,8 @@
   },
   "rules": {
     "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
+    "no-console": "error",
     "import/order": [
       "error",
       {
