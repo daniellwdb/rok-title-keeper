@@ -65,10 +65,6 @@ export const addTitle = async ({
 
   if (onlineStatusIndicatorHexColour !== ONLINE_STATUS_INDICATOR_HEX) {
     await rebootRoK(device);
-
-    throw new Error(
-      "Rise of Kingdoms was closed and restarted. Please request your title again."
-    );
   }
 
   const worker = await createWorker();
