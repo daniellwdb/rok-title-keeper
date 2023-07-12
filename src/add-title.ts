@@ -8,7 +8,6 @@ import { config } from "./config.js";
 import { Kingdom, type Title } from "./types.js";
 import { findCutoutPosition } from "./util/find-cutout-position.js";
 import {
-  MAP_POSITION,
   getLastVisitedKingdom,
   getPixelHexColour,
   rebootRoK,
@@ -46,20 +45,6 @@ const SLOW_TRAVEL_TIMEOUT = 17_000;
 const UI_ELEMENT_ANIMATION_DURATION = 750;
 const NEW_CLICK_IDLE_TIMEOUT = 100;
 
-const SCREENSHOT_PATH = join(process.cwd(), "temp", "screenshot.jpg");
-
-const ADD_TITLE_BUTTON_IMAGE_PATH = join(
-  process.cwd(),
-  "resources",
-  "add-title-button.jpg"
-);
-
-const MARKERS_BUTTON_IMAGE_PATH = join(
-  process.cwd(),
-  "resources",
-  "markers-button.jpg"
-);
-
 export const addTitle = async ({
   device,
   title,
@@ -80,16 +65,6 @@ export const addTitle = async ({
 
   if (onlineStatusIndicatorHexColour !== ONLINE_STATUS_INDICATOR_HEX) {
     await rebootRoK(device);
-  }
-
-  const markersButtonCoordinates = await findCutoutPosition(
-    SCREENSHOT_PATH,
-    MARKERS_BUTTON_IMAGE_PATH
-  );
-
-  if (!markersButtonCoordinates) {
-    // Tap map
-    await device.shell(`input tap ${MAP_POSITION}`);
   }
 
   const worker = await createWorker();
@@ -161,6 +136,14 @@ export const addTitle = async ({
   await device.shell(`input tap ${ELEMENT_POSITIONS.CITY_LOCATION}`);
 
   await setTimeout(UI_ELEMENT_ANIMATION_DURATION);
+
+  const SCREENSHOT_PATH = join(process.cwd(), "temp", "screenshot.jpg");
+
+  const ADD_TITLE_BUTTON_IMAGE_PATH = join(
+    process.cwd(),
+    "resources",
+    "add-title-button.jpg"
+  );
 
   await writeFile(SCREENSHOT_PATH, await device.screenshot());
 
