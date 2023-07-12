@@ -32,7 +32,7 @@
     "*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
-    "@prisma/client": "^4.16.1",
+    "@prisma/client": "^4.16.2",
     "@u4/opencv4nodejs": "^6.5.2",
     "adb-ts": "^4.0.4",
     "clipboardy": "^3.0.0",
