@@ -2,7 +2,7 @@ import { setTimeout } from "node:timers/promises";
 import type { Device } from "adb-ts";
 
 const GAME_BOOT_TIMEOUT = 40_000;
-const MAP_POSITION = "75 825";
+export const MAP_POSITION = "75 825";
 const MAP_ANIMATION_DURATION = 500;
 
 export const rebootRoK = async (device: Device) => {
