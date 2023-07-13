@@ -1,7 +1,7 @@
 import { setTimeout } from "node:timers/promises";
 import type { Device } from "adb-ts";
 
-const GAME_SPLASH_TIMEOUT = 5_000;
+const GAME_SPLASH_TIMEOUT = 15_000;
 const GAME_BOOT_TIMEOUT = 35_000;
 export const MAP_POSITION = "75 825";
 const MAP_ANIMATION_DURATION = 500;
