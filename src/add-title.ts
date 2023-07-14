@@ -38,12 +38,14 @@ const ELEMENT_POSITIONS = {
   CONFIRM_BUTTON: "801.5 800",
   TITLE_OVERLAY_CLOSE_BUTTON: "1395 56",
   ONLINE_STATUS_INDICATOR: "95 9",
+  MAP_LOCATION: "75 825",
 } as const;
 
 const QUICK_TRAVEL_TIMEOUT = 4_000;
 const SLOW_TRAVEL_TIMEOUT = 17_000;
 const UI_ELEMENT_ANIMATION_DURATION = 750;
 const NEW_CLICK_IDLE_TIMEOUT = 100;
+const MAP_ANIMATION_DURATION = 500;
 
 export const addTitle = async ({
   device,
@@ -57,14 +59,19 @@ export const addTitle = async ({
     await device.screenshot(),
     ...(ELEMENT_POSITIONS.ONLINE_STATUS_INDICATOR.split(" ").map(Number) as [
       number,
-      number
-    ])
+      number,
+    ]),
   );
 
   const ONLINE_STATUS_INDICATOR_HEX = "#e30000";
 
   if (onlineStatusIndicatorHexColour !== ONLINE_STATUS_INDICATOR_HEX) {
     await rebootRoK(device);
+
+    // Tap map
+    await device.shell(`input tap ${ELEMENT_POSITIONS.MAP_LOCATION}`);
+
+    await setTimeout(MAP_ANIMATION_DURATION);
   }
 
   const worker = await createWorker();
@@ -79,12 +86,12 @@ export const addTitle = async ({
   });
 
   const KINGDOM_INPUT_VALUE = config.get(
-    `kingdom.${kingdom.toLowerCase() as Lowercase<Kingdom>}`
+    `kingdom.${kingdom.toLowerCase() as Lowercase<Kingdom>}`,
   );
 
   // Open coordinates search overlay
   await device.shell(
-    `input tap ${ELEMENT_POSITIONS.COORDINATES_SEARCH_BUTTON}`
+    `input tap ${ELEMENT_POSITIONS.COORDINATES_SEARCH_BUTTON}`,
   );
 
   // Tap kingdom id input
@@ -92,7 +99,7 @@ export const addTitle = async ({
 
   // Remove existing input (https://stackoverflow.com/a/72186108)
   await device.shell(
-    "input keyevent --longpress 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67"
+    "input keyevent --longpress 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67",
   );
 
   // Enter kingdom id
@@ -121,13 +128,13 @@ export const addTitle = async ({
 
   // Tap search button
   await device.shell(
-    `input tap ${ELEMENT_POSITIONS.COORDINATES_OVERLAY_SEARCH_BUTTON}`
+    `input tap ${ELEMENT_POSITIONS.COORDINATES_OVERLAY_SEARCH_BUTTON}`,
   );
 
   const isTravellingToNewKingdom = getLastVisitedKingdom() !== kingdom;
 
   await setTimeout(
-    isTravellingToNewKingdom ? SLOW_TRAVEL_TIMEOUT : QUICK_TRAVEL_TIMEOUT
+    isTravellingToNewKingdom ? SLOW_TRAVEL_TIMEOUT : QUICK_TRAVEL_TIMEOUT,
   );
 
   setLastVisitedKingdom(kingdom);
@@ -142,14 +149,14 @@ export const addTitle = async ({
   const ADD_TITLE_BUTTON_IMAGE_PATH = join(
     process.cwd(),
     "resources",
-    "add-title-button.jpg"
+    "add-title-button.jpg",
   );
 
   await writeFile(SCREENSHOT_PATH, await device.screenshot());
 
   const addTitleButtoncoordinates = await findCutoutPosition(
     SCREENSHOT_PATH,
-    ADD_TITLE_BUTTON_IMAGE_PATH
+    ADD_TITLE_BUTTON_IMAGE_PATH,
   );
 
   if (!addTitleButtoncoordinates) {
@@ -158,7 +165,7 @@ export const addTitle = async ({
 
   // Tap title icon
   await device.shell(
-    `input tap ${addTitleButtoncoordinates.x} ${addTitleButtoncoordinates.y}`
+    `input tap ${addTitleButtoncoordinates.x} ${addTitleButtoncoordinates.y}`,
   );
 
   await setTimeout(UI_ELEMENT_ANIMATION_DURATION);
@@ -171,17 +178,17 @@ export const addTitle = async ({
       `${title.toUpperCase() as Uppercase<Title>}_TITLE_CHECKBOX`
     ]
       .split(" ")
-      .map(Number) as [number, number])
+      .map(Number) as [number, number]),
   );
 
   const titleChecked = !titleCheckboxHexColour.startsWith(
-    UNSELECTED_TITLE_CHECKBOX_BACKGROUND_COLOURS_HEX_START
+    UNSELECTED_TITLE_CHECKBOX_BACKGROUND_COLOURS_HEX_START,
   );
 
   if (titleChecked) {
     // Press close button
     await device.shell(
-      `input tap ${ELEMENT_POSITIONS.TITLE_OVERLAY_CLOSE_BUTTON}`
+      `input tap ${ELEMENT_POSITIONS.TITLE_OVERLAY_CLOSE_BUTTON}`,
     );
 
     throw new Error(`You already have the ${title} title.`);
@@ -193,7 +200,7 @@ export const addTitle = async ({
       ELEMENT_POSITIONS[
         `${title.toUpperCase() as Uppercase<Title>}_TITLE_CHECKBOX`
       ]
-    }`
+    }`,
   );
 
   await setTimeout(NEW_CLICK_IDLE_TIMEOUT);

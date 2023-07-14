@@ -2,9 +2,8 @@ import { setTimeout } from "node:timers/promises";
 import type { Device } from "adb-ts";
 
 const GAME_SPLASH_TIMEOUT = 15_000;
-const GAME_BOOT_TIMEOUT = 35_000;
+export const GAME_BOOT_TIMEOUT = 35_000;
 export const MAP_POSITION = "75 825";
-const MAP_ANIMATION_DURATION = 500;
 
 export const rebootRoK = async (device: Device) => {
   // Close Rise of Kingdoms
@@ -15,13 +14,8 @@ export const rebootRoK = async (device: Device) => {
 
   await setTimeout(GAME_SPLASH_TIMEOUT);
 
-  // Tap map location (to bypass splash screen)
-  await device.shell(`input tap ${MAP_POSITION}`);
+  // Tap anywhere (to bypass splash screen)
+  await device.shell("500 450");
 
   await setTimeout(GAME_BOOT_TIMEOUT);
-
-  // Tap map
-  await device.shell(`input tap ${MAP_POSITION}`);
-
-  await setTimeout(MAP_ANIMATION_DURATION);
 };
