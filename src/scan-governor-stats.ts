@@ -8,6 +8,7 @@ import sharp from "sharp";
 import { OEM, PSM, createWorker } from "tesseract.js";
 import { findCutoutPosition } from "./util/find-cutout-position.js";
 import { updateGovernorDKP, upsertGovernorDKP } from "./util/governor-dkp.js";
+import { rebootRoK } from "./util/reboot-rok.js";
 
 const ELEMENT_POSITIONS = {
   GOVERNOR_PROFILE_BUTTON: "60 50",
@@ -50,8 +51,7 @@ const ELEMENT_POSITIONS = {
   KILL_RANKINGS_BUTTON: "825 525",
 } as const;
 
-const FAST_ANIMATION_DURATION = 500;
-const GAME_BOOT_TIMEOUT = 40_000;
+const ANIMATION_DURATION = 750;
 
 const RESOURCE_ROOT_PATH = join(process.cwd(), "resources", "stats-scan");
 const TEMP_ROOT_PATH = join(process.cwd(), "temp");
@@ -62,30 +62,24 @@ export const scanGovernorStats = async (
   prisma: PrismaClient,
   newKvK: boolean,
   resetPower: boolean,
-  resetKp: boolean
+  resetKp: boolean,
 ) => {
-  // Close Rise of Kingdoms
-  await device.execShell("am force-stop com.lilithgame.roc.gp");
-
-  // Open Rise of Kingdoms
-  await device.execShell("monkey -p com.lilithgame.roc.gp 1");
-
-  await setTimeout(GAME_BOOT_TIMEOUT);
+  await rebootRoK(device);
 
   // Open governor profile
   await device.shell("input tap 60 50");
 
-  await setTimeout(FAST_ANIMATION_DURATION);
+  await setTimeout(ANIMATION_DURATION);
 
   // Open Rankings
   await device.shell(`input tap ${ELEMENT_POSITIONS.RANKINGS_BUTTON}`);
 
-  await setTimeout(FAST_ANIMATION_DURATION);
+  await setTimeout(ANIMATION_DURATION);
 
   // Open individual kill rankings
   await device.shell(`input tap ${ELEMENT_POSITIONS.KILL_RANKINGS_BUTTON}`);
 
-  await setTimeout(FAST_ANIMATION_DURATION);
+  await setTimeout(ANIMATION_DURATION);
 
   const worker = await createWorker();
 
@@ -109,19 +103,19 @@ export const scanGovernorStats = async (
 
     // Open governor profile
     await device.shell(
-      `input tap ${ELEMENT_POSITIONS.GOVERNOR_PROFILE_PREVIEW_X_COORDINATE} ${ELEMENT_POSITIONS.GOVERNOR_PROFILE_PREVIEW_Y_CLICK_COORDINATES[NEXT_CLICK_POS]}`
+      `input tap ${ELEMENT_POSITIONS.GOVERNOR_PROFILE_PREVIEW_X_COORDINATE} ${ELEMENT_POSITIONS.GOVERNOR_PROFILE_PREVIEW_Y_CLICK_COORDINATES[NEXT_CLICK_POS]}`,
     );
 
-    await setTimeout(FAST_ANIMATION_DURATION);
+    await setTimeout(ANIMATION_DURATION);
 
     await writeFile(
       join(TEMP_ROOT_PATH, "governor-profile.jpg"),
-      await device.screenshot()
+      await device.screenshot(),
     );
 
     const moreInfoButtonCoordinates = await findCutoutPosition(
       join(TEMP_ROOT_PATH, "governor-profile.jpg"),
-      join(RESOURCE_ROOT_PATH, "more-info-button.jpg")
+      join(RESOURCE_ROOT_PATH, "more-info-button.jpg"),
     );
 
     if (!moreInfoButtonCoordinates) {
@@ -130,7 +124,7 @@ export const scanGovernorStats = async (
       // Swipe to next governor profile
       await device.shell("input swipe 690 605 690 540");
 
-      await setTimeout(FAST_ANIMATION_DURATION);
+      await setTimeout(ANIMATION_DURATION);
 
       continue;
     }
@@ -139,7 +133,7 @@ export const scanGovernorStats = async (
 
     const copyNicknameButtonCoordinates = await findCutoutPosition(
       join(TEMP_ROOT_PATH, "governor-profile.jpg"),
-      join(RESOURCE_ROOT_PATH, "copy-nickname-button.jpg")
+      join(RESOURCE_ROOT_PATH, "copy-nickname-button.jpg"),
     );
 
     if (!copyNicknameButtonCoordinates) {
@@ -148,15 +142,15 @@ export const scanGovernorStats = async (
 
     // Copy nickname
     await device.shell(
-      `input tap ${copyNicknameButtonCoordinates.x} ${copyNicknameButtonCoordinates.y}`
+      `input tap ${copyNicknameButtonCoordinates.x} ${copyNicknameButtonCoordinates.y}`,
     );
 
-    await setTimeout(FAST_ANIMATION_DURATION);
+    await setTimeout(ANIMATION_DURATION);
 
     const nickname = await clipboard.read();
 
     const governorProfileToBW = await sharp(
-      join(TEMP_ROOT_PATH, "governor-profile.jpg")
+      join(TEMP_ROOT_PATH, "governor-profile.jpg"),
     )
       .threshold(210)
       .blur(0.75)
@@ -175,7 +169,7 @@ export const scanGovernorStats = async (
     });
 
     const governorProfileToGrayScale = await sharp(
-      join(TEMP_ROOT_PATH, "governor-profile.jpg")
+      join(TEMP_ROOT_PATH, "governor-profile.jpg"),
     )
       .grayscale()
       .toBuffer();
@@ -188,21 +182,21 @@ export const scanGovernorStats = async (
 
     const killStatisticsButtonCoordinates = await findCutoutPosition(
       join(TEMP_ROOT_PATH, "governor-profile.jpg"),
-      join(RESOURCE_ROOT_PATH, "kill-statistics-button.jpg")
+      join(RESOURCE_ROOT_PATH, "kill-statistics-button.jpg"),
     );
 
     if (!killStatisticsButtonCoordinates) {
       throw new Error(
-        "Could not locate coordinates for opening kill statistics."
+        "Could not locate coordinates for opening kill statistics.",
       );
     }
 
     // Open kill statistics
     await device.shell(
-      `input tap ${killStatisticsButtonCoordinates.x} ${killStatisticsButtonCoordinates.y}`
+      `input tap ${killStatisticsButtonCoordinates.x} ${killStatisticsButtonCoordinates.y}`,
     );
 
-    await setTimeout(FAST_ANIMATION_DURATION);
+    await setTimeout(ANIMATION_DURATION);
 
     const killStatisticsToBW = await sharp(await device.screenshot())
       .threshold(210)
@@ -225,7 +219,7 @@ export const scanGovernorStats = async (
       kills
         .split("\n")
         .filter(Boolean)
-        .map((kills, index) => [`tier${index + 1}kp`, kills])
+        .map((kills, index) => [`tier${index + 1}kp`, kills]),
     ) as Record<`tier${1 | 2 | 3 | 4 | 5}kp`, string>;
 
     // Open More Info
@@ -234,10 +228,10 @@ export const scanGovernorStats = async (
     await device.shell(
       `input tap ${moreInfoButtonCoordinates.x + BUTTON_CLICK_AREA_OFFSET} ${
         moreInfoButtonCoordinates.y + BUTTON_CLICK_AREA_OFFSET
-      }`
+      }`,
     );
 
-    await setTimeout(FAST_ANIMATION_DURATION);
+    await setTimeout(ANIMATION_DURATION);
 
     const moreInfoStatsToGrayscale = await sharp(await device.screenshot())
       .grayscale()
@@ -258,14 +252,14 @@ export const scanGovernorStats = async (
     // Close More Info
     await device.shell(`input tap ${ELEMENT_POSITIONS.MORE_INFO_CLOSE_BUTTON}`);
 
-    await setTimeout(FAST_ANIMATION_DURATION);
+    await setTimeout(ANIMATION_DURATION);
 
     // Close Governor Profile
     await device.shell(
-      `input tap ${ELEMENT_POSITIONS.GOVERNOR_PROFILE_CLOSE_BUTTON}`
+      `input tap ${ELEMENT_POSITIONS.GOVERNOR_PROFILE_CLOSE_BUTTON}`,
     );
 
-    await setTimeout(FAST_ANIMATION_DURATION);
+    await setTimeout(ANIMATION_DURATION);
 
     if (
       !nickname ||
@@ -298,10 +292,10 @@ export const scanGovernorStats = async (
 
   // Close individual kill rankings
   await device.shell(
-    `input tap ${ELEMENT_POSITIONS.CLOSE_KILL_RANKINGS_BUTTON}`
+    `input tap ${ELEMENT_POSITIONS.CLOSE_KILL_RANKINGS_BUTTON}`,
   );
 
-  await setTimeout(FAST_ANIMATION_DURATION);
+  await setTimeout(ANIMATION_DURATION);
 
   // Open individual kill rankings
   await device.shell(`input tap ${ELEMENT_POSITIONS.KILL_RANKINGS_BUTTON}`);
