@@ -92,7 +92,7 @@ _Pixel density_ -> Custom (450 DPI)
 
 _Android debug bridge_ -> ON
 
-5. Open Rise of Kingdoms and **make sure your character is not in the "Your City" view so it can enter coordinates**.
+**In game, go to "General Settings" and enable "Disable Opening Animation"**.
 
 ### Scripts
 
