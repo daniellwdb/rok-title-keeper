@@ -46,7 +46,7 @@
     "write-excel-file": "^1.4.27"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.6.6",
+    "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^17.6.6",
     "@types/convict": "^6.1.2",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
