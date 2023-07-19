@@ -64,20 +64,24 @@ export const exportCommand = {
         value: "DKP remaining",
         fontWeight: "bold",
       },
+      {
+        value: "Dead requirement",
+        fontWeight: "bold",
+      },
     ];
 
     const DATA_ROWS = dkps.flatMap((dkp) =>
       Object.values(dkp).map((value) => ({
         type: typeof value === "number" ? Number : String,
         value,
-      }))
+      })),
     );
 
     const buffer = await writeXlsxFile(
       [HEADER_ROW, ...chunks(DATA_ROWS, HEADER_ROW.length)],
       {
         buffer: true,
-      }
+      },
     );
 
     return interaction.followUp({
