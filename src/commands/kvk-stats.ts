@@ -124,7 +124,7 @@ export const kvkStatsCommand = {
         },
         {
           name: "Dead requirement",
-          value: `${dkp.deadRequirement}%`,
+          value: `${dkp.deadRequirement}`,
           inline: true,
         },
         {
