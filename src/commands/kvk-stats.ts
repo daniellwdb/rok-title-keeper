@@ -43,12 +43,13 @@ export const kvkStatsCommand = {
     });
 
     const governorDkp = governorDkps.find((governorDkp) =>
-      governorDkp.governor.governorConnections.some((governorConnection) =>
-        id
-          ? governorDkp.governor.id === id
-          : governorConnection.discordUserId === interaction.user.id &&
-            governorConnection.governorType === governorType,
-      ),
+      id
+        ? governorDkp.governor.id === id
+        : governorDkp.governor.governorConnections.some(
+            (governorConnection) =>
+              governorConnection.discordUserId === interaction.user.id &&
+              governorConnection.governorType === governorType,
+          ),
     );
 
     if (!governorDkp) {
