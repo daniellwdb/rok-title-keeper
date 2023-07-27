@@ -30,7 +30,7 @@ const ELEMENT_POSITIONS = {
   X_COORDINATE_INPUT: "798.5 179",
   Y_COORDINATE_INPUT: "991.5 179",
   COORDINATES_OVERLAY_SEARCH_BUTTON: "1102 179",
-  CITY_LOCATION: "803 449.5",
+  CITY_LOCATIONS: ["797 449.5", "803 449.5"],
   JUSTICE_TITLE_CHECKBOX: "367 493",
   DUKE_TITLE_CHECKBOX: "643 493",
   ARCHITECT_TITLE_CHECKBOX: "938 493",
@@ -139,29 +139,43 @@ export const addTitle = async ({
 
   setLastVisitedKingdom(kingdom);
 
-  // Tap city
-  await device.shell(`input tap ${ELEMENT_POSITIONS.CITY_LOCATION}`);
+  const getTitleButtonCoordinates = async (
+    cityLocationIndex = 0,
+  ): Promise<Record<"x" | "y", number>> => {
+    if (cityLocationIndex > ELEMENT_POSITIONS.CITY_LOCATIONS.length) {
+      throw new Error("You might have entered the wrong coordinates.");
+    }
 
-  await setTimeout(UI_ELEMENT_ANIMATION_DURATION);
+    // Tap city
+    await device.shell(
+      `input tap ${ELEMENT_POSITIONS.CITY_LOCATIONS[cityLocationIndex]}`,
+    );
 
-  const SCREENSHOT_PATH = join(process.cwd(), "temp", "screenshot.jpg");
+    await setTimeout(UI_ELEMENT_ANIMATION_DURATION);
 
-  const ADD_TITLE_BUTTON_IMAGE_PATH = join(
-    process.cwd(),
-    "resources",
-    "add-title-button.jpg",
-  );
+    const SCREENSHOT_PATH = join(process.cwd(), "temp", "screenshot.jpg");
 
-  await writeFile(SCREENSHOT_PATH, await device.screenshot());
+    const ADD_TITLE_BUTTON_IMAGE_PATH = join(
+      process.cwd(),
+      "resources",
+      "add-title-button.jpg",
+    );
 
-  const addTitleButtoncoordinates = await findCutoutPosition(
-    SCREENSHOT_PATH,
-    ADD_TITLE_BUTTON_IMAGE_PATH,
-  );
+    await writeFile(SCREENSHOT_PATH, await device.screenshot());
 
-  if (!addTitleButtoncoordinates) {
-    throw new Error("You might have entered the wrong coordinates.");
-  }
+    const addTitleButtoncoordinates = await findCutoutPosition(
+      SCREENSHOT_PATH,
+      ADD_TITLE_BUTTON_IMAGE_PATH,
+    );
+
+    if (!addTitleButtoncoordinates) {
+      return getTitleButtonCoordinates(cityLocationIndex + 1);
+    }
+
+    return addTitleButtoncoordinates;
+  };
+
+  const addTitleButtoncoordinates = await getTitleButtonCoordinates();
 
   // Tap title icon
   await device.shell(
