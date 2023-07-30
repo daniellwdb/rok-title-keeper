@@ -7,6 +7,12 @@
 </div>
 
 <div align="center">
+  <a href="https://discord.com/users/405778045941841923">
+    <img
+      src="https://img.shields.io/badge/DISCORD-PAID_SUPPORT-5865F2?style=for-the-badge"
+      alt="Discord"
+    />
+  </a>
   <img
     src="https://img.shields.io/github/languages/top/daniellwdb/rok-title-keeper?style=for-the-badge"
     alt="Language"
@@ -18,7 +24,7 @@
 </div>
 
 <p align="center">
-  <a href="#-about">About</a> •
+  <a href="#-about">About</a> • 
   <a href="#-key-features">Key Features</a> •
   <a href="#-setup">Setup</a> •
   <a href="#license">License</a>
