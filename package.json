@@ -58,7 +58,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.3",
-    "pino-pretty": "^10.1.0",
+    "pino-pretty": "^10.2.0",
     "prettier": "^3.0.0",
     "prisma": "^5.0.0",
     "tsx": "^3.12.7",
