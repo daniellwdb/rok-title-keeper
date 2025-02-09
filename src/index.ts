@@ -10,7 +10,7 @@ import { getADBPort } from "./util/get-adb-port.js";
 import { setDevice, getDevice } from "./device.js";
 import { execAsync } from "./util/exec-async.js";
 
-const APP_VERSION = "2.9.8";
+const APP_VERSION = "3.0.0";
 
 const PLATFORM_TOOLS_DIR = "platform-tools";
 

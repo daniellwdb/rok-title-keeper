@@ -39,9 +39,6 @@ export enum BotState {
   PAUSED = "Paused",
 }
 
-export const CONFIG_SERVER_URL = "https://roka-server.fly.dev";
-export const UNAUTHORIZED_STATUS = 401;
-
 export const SHORT_ANIMATION_DELAY = 250;
 export const ANIMATION_DELAY = config.ANIMATION_DELAY
   ? Number(config.ANIMATION_DELAY)

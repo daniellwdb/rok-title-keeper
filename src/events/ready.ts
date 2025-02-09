@@ -1,13 +1,8 @@
 import { createEvent } from "./util/create-event.js";
 import { Events } from "discord.js";
 import * as commands from "../commands/mod.js";
-import fetch from "node-fetch";
 import { config as appConfig } from "../config.js";
-import { setTimeout } from "node:timers/promises";
 import { TaskType, queue$ } from "../queue.js";
-import { CONFIG_SERVER_URL, UNAUTHORIZED_STATUS } from "../constants.js";
-
-const HALF_HOUR = 30 * 60 * 1000;
 
 export const readyEvent = createEvent({
   name: Events.ClientReady,
@@ -53,43 +48,6 @@ export const readyEvent = createEvent({
       return;
     }
 
-    const getConfig = async () => {
-      const response = await fetch(`${CONFIG_SERVER_URL}/configs`);
-
-      if (response.status === UNAUTHORIZED_STATUS) {
-        context.logger.error(
-          "Unauthorized. Please visit: https://discord.gg/dAa4axurq7 to buy this bot or activate the trial."
-        );
-
-        process.exit();
-      }
-
-      const configs = (await response.json()) as Partial<NodeJS.ProcessEnv>[];
-      const config = configs.find(
-        (config) => config.APPLICATION_ID === client.user.id
-      );
-
-      if (
-        !config ||
-        !client.guilds.cache.some((guild) => guild.id === config.DISCORD_GUILD)
-      ) {
-        context.logger.error(
-          "Unauthorized. Please visit: https://discord.gg/dAa4axurq7 to buy this bot or activate the trial."
-        );
-
-        process.exit();
-      }
-
-      return config;
-    };
-
-    const config = await getConfig();
-
-    for (const [key, value] of Object.entries(config)) {
-      process.env[key] =
-        typeof value === "boolean" && value === true ? "true" : value;
-    }
-
     context.logger.info({
       homeKingdom: appConfig.HOME_KINGDOM,
       lostKingdom: appConfig.LOST_KINGDOM,
@@ -98,14 +56,15 @@ export const readyEvent = createEvent({
       rebootInterval: appConfig.REBOOT_INTERVAL,
     });
 
+    context.logger.info("Thanks for the support everyone! ❤️");
+    context.logger.info(
+      "Please consider supporting me through PayPal: https://www.paypal.com/paypalme/dwijdenbosch"
+    );
+
     await client.application.commands.set(Object.values(commands));
     await devGuild?.commands.set([]);
 
     context.logger.info(`${client.user.username} is ready.`);
-
-    setInterval(async () => {
-      await getConfig();
-    }, 43200000);
 
     if (appConfig.REBOOT_INTERVAL) {
       setInterval(() => {
@@ -116,23 +75,6 @@ export const readyEvent = createEvent({
           ...context,
         });
       }, appConfig.REBOOT_INTERVAL * 60 * 60 * 1000);
-    }
-
-    if (process.env.TRIAL_MODE === "true") {
-      const date = new Date();
-      date.setTime(date.getTime() + HALF_HOUR);
-
-      context.logger.warn(
-        `Trial mode is activated. App will automatically close at ${date.toLocaleTimeString()}.`
-      );
-
-      await setTimeout(HALF_HOUR);
-
-      context.logger.error(
-        "Trial expired. Please visit: https://discord.gg/dAa4axurq7 to buy this bot or restart it."
-      );
-
-      process.exit();
     }
   },
 });

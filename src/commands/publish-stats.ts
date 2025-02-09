@@ -5,7 +5,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Governor } from "@prisma/client";
 import { getKvkStats } from "./util/get-kvk-stats.js";
-import { CONFIG_SERVER_URL, UNAUTHORIZED_STATUS } from "../constants.js";
+
+const CONFIG_SERVER_URL = "your-server-url";
 
 export const publishStatsCommand = createCommand({
   type: ApplicationCommandType.ChatInput,
@@ -55,7 +56,7 @@ export const publishStatsCommand = createCommand({
         Boolean(value)
       );
 
-    const response = await fetch(`${CONFIG_SERVER_URL}/publish-stats`, {
+    await fetch(`${CONFIG_SERVER_URL}/publish-stats`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -66,12 +67,6 @@ export const publishStatsCommand = createCommand({
         governorKvKStatitics: governorsWithKvkStats,
       }),
     });
-
-    if (response.status === UNAUTHORIZED_STATUS) {
-      return void interaction.followUp(
-        "Your server does not have permission to publish statistics. Please visit https://discord.gg/dAa4axurq7 to enable this option."
-      );
-    }
 
     return void interaction.followUp(
       `Statistics have been published. View the page at: https://roka.vercel.app/stats/${interaction.guild.id}.`

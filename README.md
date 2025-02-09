@@ -1,7 +1,7 @@
 <div align="center">
   <h1>roka</h1>
   <h4>
-    Rise of Kingdoms bot to manage titles through Discord.
+    Rise of Kingdoms bot to manage titles and DKP and through Discord.
   </h4>
 </div>
 
