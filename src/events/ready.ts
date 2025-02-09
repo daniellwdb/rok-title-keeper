@@ -7,15 +7,6 @@ import { TaskType, queue$ } from "../queue.js";
 export const readyEvent = createEvent({
   name: Events.ClientReady,
   async execute(client, context) {
-    if (
-      process.env.NODE_ENV === "production" &&
-      (process.env.DISCORD_GUILD ||
-        process.env.APPLICATION_ID ||
-        process.env.TRIAL_MODE)
-    ) {
-      throw new Error("Found unsupported environment variable.");
-    }
-
     const devGuild = appConfig.DISCORD_DEV_GUILD
       ? client.guilds.cache.get(appConfig.DISCORD_DEV_GUILD)
       : undefined;

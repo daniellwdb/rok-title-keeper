@@ -7,7 +7,6 @@ const schema = z.object({
   DISCORD_TOKEN: z.string(),
   HOME_KINGDOM: z.string(),
   LOST_KINGDOM: z.string(),
-  TRIAL_MODE: z.string().optional(),
   ANIMATION_DELAY: z.string(),
   THEME_COLOUR: z.string().optional(),
   DISCORD_DEV_GUILD: z.string().optional(),
