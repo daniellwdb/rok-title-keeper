@@ -23,7 +23,7 @@
     "pino-pretty": "^10.3.1",
     "rgb-hex": "^4.1.0",
     "rxjs": "^7.8.1",
-    "tesseract.js": "^5.0.3",
+    "tesseract.js": "^6.0.0",
     "unzip-stream": "^0.3.1",
     "write-excel-file": "^1.4.27",
     "yaml": "^2.3.4",
