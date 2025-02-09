@@ -1,34 +1,44 @@
-import { SlashCommandBuilder } from "discord.js";
-import { GovernorType, type CommandExecutionContext } from "../types.js";
+import {
+  ApplicationCommandOptionType,
+  ApplicationCommandType,
+} from "discord.js";
+import { createCommand } from "./util/create-command.js";
+import { commandOptions } from "./util/command-options.js";
+import { GovernorType } from "../constants.js";
+import { interpolate } from "../util/interpolate.js";
+import { config } from "../config.js";
 
-export const linkCommand = {
-  data: new SlashCommandBuilder()
-    .setName("link")
-    .setDescription("Link a governor profile to your Discord user")
-    .addStringOption((option) =>
-      option
-        .setName("id")
-        .setDescription("Governor ID")
-        .setMinLength(4)
-        .setRequired(true)
-    )
-    .addStringOption((option) =>
-      option
-        .setName("type")
-        .setDescription("Governor type")
-        .addChoices(
-          ...Object.entries(GovernorType).map(([name, value]) => ({
-            name,
-            value,
-          }))
-        )
-        .setRequired(true)
-    )
-    .toJSON(),
-  execute: async ({ interaction, prisma }: CommandExecutionContext) => {
+const OPTION_GOVERNOR_ID_NAME = "id";
+const OPTION_GOVERNOR_TYPE_NAME = "type";
+
+export const linkCommand = createCommand({
+  type: ApplicationCommandType.ChatInput,
+  name: "link",
+  description: "Link your Discord account to a governor profile",
+  options: [
+    {
+      type: ApplicationCommandOptionType.String,
+      name: OPTION_GOVERNOR_ID_NAME,
+      description: "ID of the governor profile",
+      required: true,
+    },
+    {
+      type: ApplicationCommandOptionType.String,
+      name: OPTION_GOVERNOR_TYPE_NAME,
+      description: "Governor type",
+      choices: commandOptions(GovernorType),
+      required: true,
+    },
+  ],
+  async execute(interaction, { prisma }) {
     await interaction.deferReply();
 
-    const id = interaction.options.getString("id", true);
+    const id = interaction.options.getString(OPTION_GOVERNOR_ID_NAME, true);
+
+    const type = interaction.options.getString(
+      OPTION_GOVERNOR_TYPE_NAME,
+      true
+    ) as GovernorType;
 
     const governor = await prisma.governor.findUnique({
       where: {
@@ -37,36 +47,34 @@ export const linkCommand = {
     });
 
     if (!governor) {
-      return interaction.followUp(
-        `Could not find a governor with ID: **${id}**`
+      return void interaction.followUp(
+        interpolate(config.GOVERNOR_PROFILE_WITH_ID_NOT_FOUND_MESSAGE, { id })
       );
     }
-
-    const governorType = interaction.options.getString(
-      "type",
-      true
-    ) as GovernorType;
 
     await prisma.governorConnection.upsert({
       where: {
         discordUserId_governorType: {
           discordUserId: interaction.user.id,
-          governorType,
+          governorType: type,
         },
       },
       create: {
         discordUserId: interaction.user.id,
-        governorID: governor.id,
-        governorType,
+        governorId: governor.id,
+        governorType: type,
       },
       update: {
-        governorID: governor.id,
-        governorType,
+        governorId: governor.id,
+        governorType: type,
       },
     });
 
-    return interaction.followUp(
-      `Succesfully linked **${governor.nickname}** (${governorType}) to your Discord user`
+    return void interaction.followUp(
+      interpolate(config.PROFILE_LINK_SUCCESSFUL_MESSAGE, {
+        nickname: governor.nickname,
+        type,
+      })
     );
   },
-};
+});

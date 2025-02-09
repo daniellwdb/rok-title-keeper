@@ -1,0 +1,20 @@
+diff --git a/node_modules/clipboardy/lib/windows.js b/node_modules/clipboardy/lib/windows.js
+index 9b48a22..99c2c69 100644
+--- a/node_modules/clipboardy/lib/windows.js
++++ b/node_modules/clipboardy/lib/windows.js
+@@ -1,14 +1,11 @@
+ import path from 'node:path';
+-import {fileURLToPath} from 'node:url';
+ import {execa, execaSync} from 'execa';
+ import {is64bitSync} from 'is64bit';
+ 
+-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+-
+ const binarySuffix = is64bitSync() ? 'x86_64' : 'i686';
+ 
+ // Binaries from: https://github.com/sindresorhus/win-clipboard
+-const windowBinaryPath = path.join(__dirname, `../fallbacks/windows/clipboard_${binarySuffix}.exe`);
++const windowBinaryPath = path.join(process.cwd(), `clipboard_${binarySuffix}.exe`)
+ 
+ const clipboard = {
+ 	copy: async options => execa(windowBinaryPath, ['--copy'], options),

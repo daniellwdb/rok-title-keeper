@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Governor {
+  id                 String   @id
+  nickname           String
+  alliance           String?
+  power              String
+  killPoints         String   @map("kill_points")
+  tier1Kills         String   @map("tier_1_kills")
+  tier2Kills         String   @map("tier_2_kills")
+  tier3Kills         String   @map("tier_3_kills")
+  tier4Kills         String?  @map("tier_4_kills")
+  tier5Kills         String?  @map("tier_5_kills")
+  dead               String
+  resourceAssistance String   @map("resource_assistance")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  governorConnections GovernorConnection[]
+
+  @@map("governors")
+}
+
+model GovernorConnection {
+  discordUserId String   @map("discord_user_id")
+  governor      Governor @relation(fields: [governorId], references: [id], onDelete: Cascade)
+  governorId    String   @map("governor_id")
+  /// MAIN | ALT | FARM
+  governorType  String   @map("governor_type")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([discordUserId, governorType])
+  @@map("governor_connections")
+}
+
+model TitleBuffConfiguration {
+  title     String   @id
+  locked    Boolean
+  ttl       Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("title_buff_configurations")
+}
+
+model TitleBuffRequest {
+  discordUserId String   @map("discord_user_id")
+  /// HOME | LOST
+  kingdomType   String   @map("kingdom_type")
+  /// MAIN | ALT | FARM
+  governorType  String   @map("governor_type")
+  x             Int
+  y             Int
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([discordUserId, kingdomType, governorType])
+  @@map("title_buff_requests")
+}

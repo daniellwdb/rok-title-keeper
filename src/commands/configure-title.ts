@@ -1,43 +1,54 @@
-import { SlashCommandBuilder, Colors } from "discord.js";
-import { Title, type CommandExecutionContext } from "../types.js";
+import {
+  ApplicationCommandOptionType,
+  ApplicationCommandType,
+  EmbedBuilder,
+} from "discord.js";
+import { createCommand } from "./util/create-command.js";
+import { commandOptions } from "./util/command-options.js";
+import { THEME_COLOUR, Title } from "../constants.js";
 
-export const configureTitleCommand = {
-  data: new SlashCommandBuilder()
-    .setName("configure-title")
-    .setDescription("Configure a title")
-    .addStringOption((option) =>
-      option
-        .setName("title")
-        .setDescription("The title to configure")
-        .setChoices(
-          ...Object.values(Title).map((title) => ({
-            name: title,
-            value: title,
-          }))
-        )
-        .setRequired(true)
-    )
-    .addIntegerOption((option) =>
-      option
-        .setName("ttl")
-        .setDescription("Amount of seconds a title should last")
-        .setRequired(true)
-    )
-    .addBooleanOption((option) =>
-      option
-        .setName("locked")
-        .setDescription("Whether or not the title should be locked")
-        .setRequired(true)
-    )
-    .toJSON(),
-  execute: async ({ interaction, prisma }: CommandExecutionContext) => {
+const OPTION_TITLE_NAME = "title";
+const OPTION_TTL_NAME = "ttl";
+const OPTION_LOCKED_NAME = "locked";
+
+export const configureTitleCommand = createCommand({
+  type: ApplicationCommandType.ChatInput,
+  name: "configure-title",
+  description: "(Un)lock and set the timeout for title buffs",
+  options: [
+    {
+      type: ApplicationCommandOptionType.String,
+      name: OPTION_TITLE_NAME,
+      description: "The title buff you want to configure",
+      choices: commandOptions(Title),
+      required: true,
+    },
+    {
+      type: ApplicationCommandOptionType.Integer,
+      name: OPTION_TTL_NAME,
+      description: "Amount of seconds a title buff should last",
+      min_value: 3,
+      required: true,
+    },
+    {
+      type: ApplicationCommandOptionType.Boolean,
+      name: OPTION_LOCKED_NAME,
+      description: "Whether or not the title buff should be locked",
+      required: true,
+    },
+  ],
+  async execute(interaction, { prisma }) {
     await interaction.deferReply();
 
-    const title = interaction.options.getString("title", true) as Title;
-    const ttl = interaction.options.getInteger("ttl", true);
-    const locked = interaction.options.getBoolean("locked", true);
+    const title = interaction.options.getString(
+      OPTION_TITLE_NAME,
+      true
+    ) as Title;
 
-    await prisma.titleConfiguration.upsert({
+    const ttl = interaction.options.getInteger(OPTION_TTL_NAME, true);
+    const locked = interaction.options.getBoolean(OPTION_LOCKED_NAME, true);
+
+    await prisma.titleBuffConfiguration.upsert({
       where: {
         title,
       },
@@ -52,11 +63,12 @@ export const configureTitleCommand = {
       },
     });
 
-    const titleConfigurations = await prisma.titleConfiguration.findMany();
+    const titleBuffConfigurations =
+      await prisma.titleBuffConfiguration.findMany();
 
-    const titleConfigurationsWithDefaultsFields = Object.values(Title).map(
+    const titleBuffConfigurationsFormatted = Object.values(Title).map(
       (title) => {
-        const titleConfiguration = titleConfigurations.find(
+        const titleConfiguration = titleBuffConfigurations.find(
           (titleConfiguration) => (titleConfiguration.title as Title) === title
         );
 
@@ -69,14 +81,13 @@ export const configureTitleCommand = {
       }
     );
 
-    return interaction.followUp({
+    return void interaction.followUp({
       embeds: [
-        {
-          title: "Title configurations",
-          color: Colors.DarkGold,
-          fields: titleConfigurationsWithDefaultsFields,
-        },
+        new EmbedBuilder()
+          .setColor(THEME_COLOUR)
+          .setTitle("Title buff configurations")
+          .addFields(titleBuffConfigurationsFormatted),
       ],
     });
   },
-};
+});

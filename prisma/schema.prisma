@@ -10,70 +10,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TitleConfiguration {
-  title     String   @id
-  locked    Boolean
-  ttl       Int
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("title_configurations")
-}
-
-model TitleRequest {
-  id            Int      @id @default(autoincrement())
-  discordUserId BigInt   @map("discord_user_id")
-  kingdom       String   @map("kingdom_id")
-  x             Int
-  y             Int
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  @@map("title_requests")
-}
-
 model Governor {
-  id                  String               @id
-  nickname            String
-  power               String
-  kp                  String
-  tier1kp             String
-  tier2kp             String
-  tier3kp             String
-  tier4kp             String
-  tier5kp             String
-  dead                String
-  resourceAssistance  String               @map("resource_assistance")
-  createdAt           DateTime             @default(now()) @map("created_at")
-  updatedAt           DateTime             @updatedAt @map("updated_at")
+  id                 String   @id
+  nickname           String
+  alliance           String?
+  power              String
+  killPoints         String   @map("kill_points")
+  tier1Kills         String   @map("tier_1_kills")
+  tier2Kills         String   @map("tier_2_kills")
+  tier3Kills         String   @map("tier_3_kills")
+  tier4Kills         String?  @map("tier_4_kills")
+  tier5Kills         String?  @map("tier_5_kills")
+  dead               String
+  resourceAssistance String   @map("resource_assistance")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
   governorConnections GovernorConnection[]
-  governorDkp         GovernorDKP?
 
   @@map("governors")
 }
 
 model GovernorConnection {
   discordUserId String   @map("discord_user_id")
-  governor      Governor @relation(fields: [governorID], references: [id])
-  governorID    String   @map("governor_id")
+  governor      Governor @relation(fields: [governorId], references: [id], onDelete: Cascade)
+  governorId    String   @map("governor_id")
+  /// MAIN | ALT | FARM
   governorType  String   @map("governor_type")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  @@id([discordUserId, governorType])
+  @@unique([discordUserId, governorType])
   @@map("governor_connections")
 }
 
-model GovernorDKP {
-  id                Int      @id @default(autoincrement())
-  powerDifference   String   @map("power_difference")
-  tier4kpDifference String   @map("tier4kp_difference")
-  tier5kpDifference String   @map("tier5kp_difference")
-  deadDifference    String   @map("dead_difference")
-  governor          Governor @relation(fields: [governorID], references: [id])
-  governorID        String   @unique @map("governor_id")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+model TitleBuffConfiguration {
+  title     String   @id
+  locked    Boolean
+  ttl       Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("governor_dkps")
+  @@map("title_buff_configurations")
+}
+
+model TitleBuffRequest {
+  discordUserId String   @map("discord_user_id")
+  /// HOME | LOST
+  kingdomType   String   @map("kingdom_type")
+  /// MAIN | ALT | FARM
+  governorType  String   @map("governor_type")
+  x             Int
+  y             Int
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([discordUserId, governorType])
+  @@map("title_buff_requests")
 }

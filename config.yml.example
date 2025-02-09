@@ -1,0 +1,63 @@
+---
+# Your Discord bot token.
+DISCORD_TOKEN: ""
+
+# Your home kingdom number. For example: "1717".
+HOME_KINGDOM: ""
+
+# Your lost kingdom number. For example: "S1717".
+LOST_KINGDOM: ""
+
+# Animation delay. Set to "750" on machines with good performance. Otherwise "1000".
+ANIMATION_DELAY: ""
+
+# Path to folder containing emulator executable
+BLUESTACKS_EXECUTABLE: "C:\\Program Files\\BlueStacks_nxt"
+
+# [OPTIONAL] Hex colour for embeds. Must start with #.
+THEME_COLOUR: ""
+
+# [OPTIONAL] List of channel ID's to send reboot notifications to, must be wrapped inside "" and separated by comma. For example: ["123", "456"]
+REBOOT_CHANNEL_IDS: []
+
+# [OPTIONAL] List of user ID's that are allowed to mark the titles of others as "done", must be wrapped inside "" and separated by comma. For example: ["123", "456"]
+MARK_DONE_USER_IDS: []
+
+# Can be used if you have multiple BlueStacks instances.
+# EMULATOR_INSTANCE_NAME: "Roka"
+
+# Hour interval to reboot the emulator.
+# REBOOT_INTERVAL: 3
+
+## DKP. Variables you can reference:
+## power, killPoints, tier1Kills, tier2Kills, tier3Kills, tier4Kills, tier5Kills, dead, resourceAssistance, powerDifference, tier4KillsDifference, tier5KillsDifference, deadDifference
+## Formula for calculating current DKP. For example: (power * 4) + (tier4Kills * 2) + dead
+CURRENT_DKP_EXPRESSION: ""
+
+## Formula for calculating required DKP. For example: (power * 4) + (tier4Kills * 2) + dead
+REQUIRED_DKP_EXPRESSION: ""
+
+## Messages
+GOVERNOR_PROFILES_NOT_FOUND_MESSAGE: "No governor profiles found. Please use the `/scan` command first."
+GOVERNOR_PROFILE_WITH_ID_NOT_FOUND_MESSAGE: "Could not find a governor with ID **{id}**."
+PROFILE_LINK_SUCCESSFUL_MESSAGE: "Succesfully linked **{nickname}** ({type}) to your Discord user."
+SCAN_STARTED_MESSAGE: "Started scanning top **{top}** governor profile(s) in **{type}** rankings. Please **do not** use your clipboard until the scan is finished."
+TITLE_LIMIT_MESSAGE: "You can only request 1 title at a time."
+TITLE_BUFF_LOCKED_MESSAGE: "The {title} title buff is currently locked."
+TITLE_REQUESTED_MESSAGE: "You requested the **{title}** title. Your position in the queue is **{length}**."
+TITLE_RECEIVED_MESSAGE: 'You received the **{title}** title for **{ttl}** seconds. Please press "Done" when you''re finished.'
+TITLE_PROVIDE_COORDINATES: "You must provide coordinates when providing a kingdom."
+TITLE_PROVIDE_KINGDOM: "You must provide a kingdom when providing coordinates."
+TITLE_PROVIDE_KINGDOM_AND_COORDINATES: "You must provide both coordinates if you provide one."
+TITLE_NOT_REQUESTED: "You have not requested a title yet. Please provide a kingdom and coordinates."
+TITLE_X_NOT_A_NUMBER: '`Kingdom: {kingdomType} x: {x} y: {y}\` - y: {x} must be a number.'
+TITLE_Y_NOT_A_NUMBER: '`Kingdom: {kingdomType} x: {x} y: {y}\` - y: {y} must be a number.'
+VERIFICATION_NOT_REQUIRED_MESSAGE: "Verification does not seem to be necessary at the moment."
+PROVIDE_POSITIONS_MESSAGE: "Please provide the correct positions in order in a new message like: 25 12 40."
+NO_VALID_RESPONSE_MESSAGE: "No valid response was given."
+VERIFICATION_FAILED_MESSAGE: "Verification failed. Please try to run the `verification` command again."
+VERIFICATION_SUCCESS_MESSAGE: "Verification was successful."
+GOVERNOR_NOT_FOUND_MESSAGE: "Could not find a governor."
+NO_COORDS_SAVED: "You don't have any coordinates saved yet."
+BOT_STATE_UPDATED: "Bot state is set to {botState}."
+BOT_STATE_PAUSED: "The bot is currently paused."

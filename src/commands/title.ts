@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-
 import {
   ActionRowBuilder,
+  ApplicationCommandOptionType,
+  ApplicationCommandType,
   AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -9,197 +9,209 @@ import {
   DiscordjsError,
   DiscordjsErrorCodes,
   EmbedBuilder,
-  SlashCommandBuilder,
+  codeBlock,
 } from "discord.js";
-import { firstValueFrom, filter, first } from "rxjs";
+import { createCommand } from "./util/create-command.js";
+import { firstValueFrom, first } from "rxjs";
 import {
-  cancel$,
-  requestTitle$,
-  titleQueueCounts$,
-  titleRequestsQueue$,
-} from "../title-queue.js";
-import { Title, type Command, Kingdom } from "../types.js";
+  TaskType,
+  cancelTitleTimer$,
+  pendingTitleTasks$,
+  queue$,
+  tasks$,
+} from "../queue.js";
+import { GovernorType, Kingdom, THEME_COLOUR, Title } from "../constants.js";
+import { commandOptions } from "./util/command-options.js";
+import { validateAndUpsertTitleInput } from "./util/validate-and-upsert-title-input.js";
+import { config } from "../config.js";
+import { interpolate } from "../util/interpolate.js";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
-export const titleCommand = {
-  data: new SlashCommandBuilder()
-    .setName("title")
-    .setDescription("Request a title")
-    .addStringOption((option) =>
-      option
-        .setName("title")
-        .setDescription("The title you would like to request")
-        .setChoices(
-          ...Object.values(Title).map((title) => ({
-            name: title,
-            value: title,
-          }))
-        )
-        .setRequired(true)
-    )
-    .addStringOption((option) =>
-      option
-        .setName("kingdom")
-        .setDescription("The kingdom your city is located in")
-        .setChoices(
-          ...Object.values(Kingdom).map((kingdom) => ({
-            name: kingdom,
-            value: kingdom,
-          }))
-        )
-    )
-    .addIntegerOption((option) =>
-      option.setName("x").setDescription("The x-coordinate of your city")
-    )
-    .addIntegerOption((option) =>
-      option.setName("y").setDescription("The y-coordinate of your city")
-    )
-    .toJSON(),
-  execute: async ({ interaction, device, prisma, logger }) => {
-    if (!interaction.channel) {
-      throw new Error("Could not find interaction channel.");
-    }
+const OPTION_TITLE_NAME = "title";
+const OPTION_KINGDOM_NAME = "kingdom";
+const OPTION_X_COORDINATE_NAME = "x-coordinate";
+const OPTION_Y_COORDINATE_NAME = "y-coordinate";
+const OPTION_GOVERNOR_TYPE_NAME = "type";
 
+export const titleCommand = createCommand({
+  type: ApplicationCommandType.ChatInput,
+  name: "title",
+  description: "Request a title buff",
+  options: [
+    {
+      type: ApplicationCommandOptionType.String,
+      name: OPTION_TITLE_NAME,
+      description: "The title buff you want to request",
+      choices: commandOptions(Title),
+      required: true,
+    },
+    {
+      type: ApplicationCommandOptionType.String,
+      name: OPTION_KINGDOM_NAME,
+      description: "The kingdom your city is located in",
+      choices: commandOptions(Kingdom),
+      required: true,
+    },
+    {
+      type: ApplicationCommandOptionType.Integer,
+      name: OPTION_X_COORDINATE_NAME,
+      description: "The x-coordinate of your city",
+    },
+    {
+      type: ApplicationCommandOptionType.Integer,
+      name: OPTION_Y_COORDINATE_NAME,
+      description: "The y-coordinate of your city",
+    },
+    {
+      type: ApplicationCommandOptionType.String,
+      name: OPTION_GOVERNOR_TYPE_NAME,
+      description: "Governor type (default to main)",
+      choices: commandOptions(GovernorType),
+    },
+  ],
+  async execute(interaction, context) {
     await interaction.deferReply();
 
-    const title = interaction.options.getString("title", true) as Title;
-    const kingdom = interaction.options.getString("kingdom") as Kingdom | null;
-    const x = interaction.options.getInteger("x");
-    const y = interaction.options.getInteger("y");
+    const title = interaction.options.getString(
+      OPTION_TITLE_NAME,
+      true
+    ) as Title;
 
-    const titleConfiguration = await prisma.titleConfiguration.findUnique({
-      where: {
-        title,
-      },
+    const kingdom = interaction.options.getString(
+      OPTION_KINGDOM_NAME,
+      true
+    ) as Kingdom;
+
+    const x = interaction.options.getInteger(OPTION_X_COORDINATE_NAME);
+    const y = interaction.options.getInteger(OPTION_Y_COORDINATE_NAME);
+    const governorType = (interaction.options.getString("type") ??
+      GovernorType.MAIN) as GovernorType;
+
+    const titleInput = await validateAndUpsertTitleInput({
+      discordUserId: interaction.user.id,
+      kingdomType: kingdom,
+      x,
+      y,
+      governorType,
+      ...context,
     });
 
-    if (titleConfiguration?.locked) {
-      return interaction.followUp(`The ${title} title is currently locked.`);
+    if (!titleInput.ok) {
+      return void interaction.followUp(titleInput.message);
     }
 
-    const hasPendingTitleRequest = Object.values(titleQueueCounts$.value).some(
-      (pendingDiscordUserIds) =>
-        pendingDiscordUserIds.includes(interaction.user.id)
+    const kingdomId =
+      config[
+        titleInput.kingdomType === Kingdom.HOME
+          ? "HOME_KINGDOM"
+          : "LOST_KINGDOM"
+      ]!;
+
+    const hasPendingTitleTask = pendingTitleTasks$.value.some(
+      (task) => task.discordUserId === interaction.user.id
     );
 
-    if (hasPendingTitleRequest) {
-      return interaction.followUp("You can only request 1 title at a time.");
+    if (hasPendingTitleTask) {
+      return void interaction.followUp(config.TITLE_LIMIT_MESSAGE);
     }
 
-    // TODO: refactor title request history
-    const titleRequests = await prisma.titleRequest.findMany({
-      where: {
-        discordUserId: BigInt(interaction.user.id),
-      },
+    const titleBuffConfiguration =
+      await context.prisma.titleBuffConfiguration.findUnique({
+        where: {
+          title,
+        },
+        select: {
+          ttl: true,
+          locked: true,
+        },
+      });
+
+    if (titleBuffConfiguration?.locked) {
+      return void interaction.followUp(
+        interpolate(config.TITLE_BUFF_LOCKED_MESSAGE, { title })
+      );
+    }
+
+    const ttl = titleBuffConfiguration?.ttl ?? 60;
+
+    queue$.next({
+      type: TaskType.TITLE,
+      discordUserId: interaction.user.id,
+      title,
+      ttl,
+      kingdomId,
+      x: titleInput.x,
+      y: titleInput.y,
+      ...context,
     });
 
-    if ((x && !y) || (y && !x)) {
-      return interaction.followUp(
-        "You must provide both coordinates if you provide one."
-      );
-    }
-
-    const hasProvidedCoordinates = x && y;
-
-    if (!kingdom && !hasProvidedCoordinates && !titleRequests.length) {
-      return interaction.followUp(
-        "You have not requested a title yet. Please provide a kingdom and coordinates."
-      );
-    }
-
-    if (hasProvidedCoordinates && !kingdom) {
-      return interaction.followUp(
-        "You must provide a kingdom when providing coordinates."
-      );
-    }
-
-    if (kingdom && !hasProvidedCoordinates) {
-      const requestedTitleForKingdom = titleRequests.some(
-        (titleRequest) => (titleRequest.kingdom as Kingdom) === kingdom
-      );
-
-      if (!requestedTitleForKingdom) {
-        return interaction.followUp(
-          `You have not requested a title for your ${kingdom} kingdom yet. Please provide the coordinates.`
-        );
-      }
-    }
-
-    const latestTitleRequest = kingdom
-      ? titleRequests.find(
-          (titleRequest) => (titleRequest.kingdom as Kingdom) === kingdom
-        )
-      : titleRequests.at(-1);
-
-    const kingdomForTitleRequest = kingdom ?? latestTitleRequest?.kingdom;
-
-    const lastInsertedTitleRequest = await prisma.titleRequest.create({
-      data: {
-        discordUserId: BigInt(interaction.user.id),
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        kingdom: kingdomForTitleRequest!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        x: x ?? latestTitleRequest!.x,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        y: y ?? latestTitleRequest!.y,
-      },
-      select: {
-        kingdom: true,
-        x: true,
-        y: true,
-      },
-    });
+    const pendingTitleTasks = pendingTitleTasks$.value.filter(
+      (task) => task.title === title
+    );
 
     await interaction.followUp(
-      `You requested the ${title} title. Your position in the queue is: ${
-        titleQueueCounts$.value[title].length + 1
-      }`
+      interpolate(config.TITLE_REQUESTED_MESSAGE, {
+        title,
+        length: pendingTitleTasks.length,
+      })
     );
 
-    const titleTtl = titleConfiguration?.ttl ?? 60;
-
-    requestTitle$.next({
-      device,
-      title,
-      logger,
-      kingdom: lastInsertedTitleRequest.kingdom as Kingdom,
-      x: lastInsertedTitleRequest.x,
-      y: lastInsertedTitleRequest.y,
-      discordUserId: interaction.user.id,
-      titleTtl,
-    });
-
-    const titleRequestResult = await firstValueFrom(
-      titleRequestsQueue$.pipe(
-        filter(({ discordUserId }) => discordUserId === interaction.user.id),
-        first()
+    const titleResult = await firstValueFrom(
+      tasks$.pipe(
+        first(
+          ({ discordUserId, type }) =>
+            type === TaskType.TITLE && discordUserId === interaction.user.id
+        )
       )
     );
 
-    const files = [
-      new AttachmentBuilder(await device.screenshot(), {
-        name: "screenshot.jpg",
-        description: "Rise of Kingdoms screenshot",
-      }),
-    ];
+    const screenshot = await context.device.screenshot();
 
     const embedTemplate = new EmbedBuilder()
-      .setColor(Colors.DarkGold)
-      .setTitle(`${title} title requested by ${interaction.member.displayName}`)
-      .setImage("attachment://screenshot.jpg")
+      .setImage("attachment://screenshot.png")
       .setFooter({
-        text: `📍 ${lastInsertedTitleRequest.kingdom} kingdom @${lastInsertedTitleRequest.x}, ${lastInsertedTitleRequest.y}`,
+        text: `📍 ${
+          kingdomId === config.HOME_KINGDOM ? Kingdom.HOME : Kingdom.LOST
+        } kingdom @${titleInput.x}, ${titleInput.y} (${
+          titleInput.governorType
+        })`,
       });
 
-    if (!titleRequestResult.success) {
-      return interaction.channel.send({
-        files,
-        content: `${interaction.user}, unable to process your title request. Please try again.`,
-        embeds: [
-          embedTemplate.setDescription(
-            titleRequestResult.error?.message
-              ? titleRequestResult.error.message
-              : null
+    if (!titleResult.success) {
+      const errorMessage =
+        titleResult.error instanceof Error && titleResult.error.message;
+
+      if (errorMessage && errorMessage.includes("cancelled")) {
+        return;
+      }
+
+      const isWrongCoordinatesErrorMessage =
+        errorMessage && errorMessage.includes("wrong coordinates");
+
+      const description = isWrongCoordinatesErrorMessage
+        ? "Click on your city and make sure you use the X and Y coordinates displayed like the image below."
+        : `Something went wrong while requesting your title. Please try again.${
+            errorMessage ? `\n${codeBlock(errorMessage)}` : ""
+          }`;
+
+      const coordsGuideImage = await readFile(
+        join(process.cwd(), "assets", "images", "coords-guide.jpg")
+      );
+
+      return void interaction.followUp({
+        content: interaction.user.toString(),
+        files: [
+          new AttachmentBuilder(
+            isWrongCoordinatesErrorMessage ? coordsGuideImage : screenshot,
+            {
+              name: "screenshot.png",
+              description: "screenshot",
+            }
           ),
+        ],
+        embeds: [
+          embedTemplate.setColor(Colors.Red).setDescription(description),
         ],
       });
     }
@@ -210,10 +222,21 @@ export const titleCommand = {
       .setEmoji("⏱️")
       .setLabel("Done");
 
-    const successMessage = await interaction.channel.send({
-      files,
-      content: `${interaction.user}, you received the ${title} title for ${titleTtl} seconds. Please press "Done" when you're finished.`,
-      embeds: [embedTemplate],
+    const successMessage = await interaction.channel!.send({
+      files: [
+        new AttachmentBuilder(screenshot, {
+          name: "screenshot.png",
+          description: "screenshot",
+        }),
+      ],
+      content: interaction.user.toString(),
+      embeds: [
+        embedTemplate
+          .setColor(THEME_COLOUR)
+          .setDescription(
+            interpolate(config.TITLE_RECEIVED_MESSAGE, { title, ttl })
+          ),
+      ],
       components: [
         new ActionRowBuilder<ButtonBuilder>().addComponents(doneButton),
       ],
@@ -224,12 +247,15 @@ export const titleCommand = {
         filter: async (componentInteraction) => {
           await componentInteraction.deferUpdate();
 
-          return componentInteraction.user.id === interaction.user.id;
+          return (
+            componentInteraction.user.id === interaction.user.id ||
+            config.MARK_DONE_USER_IDS.includes(componentInteraction.user.id)
+          );
         },
-        time: titleTtl * 1000,
+        time: ttl * 1000,
       });
 
-      cancel$.next({ discordUserId: interaction.user.id });
+      cancelTitleTimer$.next(interaction.user.id);
     } catch (error) {
       if (
         error instanceof DiscordjsError &&
@@ -252,4 +278,4 @@ export const titleCommand = {
       });
     }
   },
-} satisfies Command;
+});

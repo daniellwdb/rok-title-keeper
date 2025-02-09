@@ -1,0 +1,14 @@
+query StatsByServerId($_eq: String = "") {
+  governor_kvk_statistics(where: { guild_id: { _eq: $_eq } }) {
+    id
+    nickname
+    power
+    power_difference
+    tier_4_kp_difference
+    tier_5_kp_difference
+    dead_difference
+    current_dkp
+    remaining_dkp
+    percentage_towards_goal
+  }
+}
