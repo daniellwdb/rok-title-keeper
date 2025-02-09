@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>rok-title-keeper</h1>
+  <h1>roka</h1>
   <h4>
     Rise of Kingdoms bot to manage titles through Discord.
   </h4>
@@ -12,11 +12,11 @@
       alt="Discord"
   /></a>
   <img
-    src="https://img.shields.io/github/languages/top/daniellwdb/rok-title-keeper?style=for-the-badge"
+    src="https://img.shields.io/github/languages/top/daniellwdb/roka?style=for-the-badge"
     alt="Language"
   />
   <img
-    src="https://img.shields.io/github/license/daniellwdb/rok-title-keeper?style=for-the-badge"
+    src="https://img.shields.io/github/license/daniellwdb/roka?style=for-the-badge"
     alt="License"
   />
 </div>
