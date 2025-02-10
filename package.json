@@ -10,7 +10,7 @@
     "release": "npm run build && npm run package"
   },
   "dependencies": {
-    "@prisma/client": "^5.18.0",
+    "@prisma/client": "^6.3.1",
     "@types/ini": "^4.1.0",
     "@u4/opencv4nodejs": "6.5.2",
     "adb-ts": "^5.0.0",
