@@ -24,8 +24,8 @@
 <p align="center">
   <a href="#-about">About</a> • 
   <a href="#features">Features</a> •
-  <a href="#license">License</a>•
-  <a href="#development">Development</a>•
+  <a href="#license">License</a> •
+  <a href="#development">Development</a> •
   <a href="#production">Production</a>
 </p>
 
