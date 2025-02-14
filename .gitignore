@@ -10,3 +10,5 @@ config.yml
 prerequisites
 *.zip
 eng.traineddata
+Setup Roka.exe
+dependencies/index.exe

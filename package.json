@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc && esbuild ./src/index.ts --bundle --platform=node --inject:./import-meta-url.js --define:import.meta.url=import_meta_url --define:process.env.NODE_ENV='production' --outfile=./update/index.js && pkg ./update/index.js --public-packages * --debug --output=./update/index.exe -t latest-win --compress GZip",
     "postbuild": "rimraf ./update/index.js && rimraf ./update.zip && mkdirp ./update/node_modules/.prisma/client && ncp ./node_modules/.prisma/client/query_engine-windows.dll.node ./update/node_modules/.prisma/client/query_engine-windows.dll.node && ncp ./node_modules/.prisma/client/query_engine-windows.dll.node ./dependencies/node_modules/.prisma/client/query_engine-windows.dll.node && ncp ./assets ./dependencies/assets && ncp ./update/index.exe ./dependencies/index.exe && rimraf ./update/node_modules/.prisma/client/database.sqlite && rimraf ./dependencies/assets/kvk.json",
-    "postinstall": "cross-env OPENCV4NODEJS_DISABLE_AUTOBUILD=1 patch-package && prisma migrate deploy && build-opencv --version 4.6.0 rebuild",
+    "postinstall": "cross-env OPENCV4NODEJS_DISABLE_AUTOBUILD=1 DATABASE_URL='file:./dev.db' patch-package && prisma migrate deploy && build-opencv --version 4.6.0 rebuild",
     "start": "cross-env DATABASE_URL='file:./dev.db' tsx watch -r dotenv/config ./src/index.ts",
     "package": "makensis installer.nsi && powershell Compress-Archive ./update/* update.zip && explorer.exe .",
     "release": "npm run build && npm run package"
