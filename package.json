@@ -17,7 +17,7 @@
     "clipboardy": "^4.0.0",
     "discord.js": "^14.15.3",
     "ini": "^4.1.1",
-    "mathjs": "^12.4.2",
+    "mathjs": "^14.2.1",
     "node-fetch": "^3.3.2",
     "pino": "^8.17.2",
     "pino-pretty": "^10.3.1",
