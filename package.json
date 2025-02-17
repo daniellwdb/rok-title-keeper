@@ -15,7 +15,7 @@
     "@u4/opencv4nodejs": "6.5.2",
     "adb-ts": "^5.0.0",
     "clipboardy": "^4.0.0",
-    "discord.js": "^14.15.3",
+    "discord.js": "^14.18.0",
     "ini": "^4.1.1",
     "mathjs": "^12.4.2",
     "node-fetch": "^3.3.2",
